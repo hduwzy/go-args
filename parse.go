@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
-
-	scalar "github.com/alexflint/go-scalar"
 )
 
 // spec represents a command line option
@@ -55,7 +53,7 @@ func MustParse(dest ...interface{}) *Parser {
 	return p
 }
 
-// Parse processes command line arguments and stores them in dest
+// ScalarParse processes command line arguments and stores them in dest
 func Parse(dest ...interface{}) error {
 	p, err := NewParser(Config{}, dest...)
 	if err != nil {
@@ -232,7 +230,7 @@ func NewParser(config Config, dests ...interface{}) (*Parser, error) {
 	return &p, nil
 }
 
-// Parse processes the given command line option, storing the results in the field
+// ScalarParse processes the given command line option, storing the results in the field
 // of the structs from which NewParser was constructed
 func (p *Parser) Parse(args []string) error {
 	// If -h or --help were specified then print usage
@@ -396,7 +394,7 @@ func nextIsNumeric(t reflect.Type, s string) bool {
 		return nextIsNumeric(t.Elem(), s)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Float32, reflect.Float64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 		v := reflect.New(t)
-		err := scalar.ParseValue(v, s)
+		err := ScalarParseValue(v, s)
 		return err == nil
 	default:
 		return false
@@ -488,7 +486,7 @@ var textUnmarshalerType = reflect.TypeOf([]encoding.TextUnmarshaler{}).Elem()
 
 // isScalar returns true if the type can be parsed from a single string
 func isScalar(t reflect.Type) (parseable, boolean bool) {
-	parseable = scalar.CanParse(t)
+	parseable = ScalarCanParse(t)
 	switch {
 	case t.Implements(textUnmarshalerType):
 		return parseable, false
@@ -503,5 +501,5 @@ func isScalar(t reflect.Type) (parseable, boolean bool) {
 
 // set a value from a string
 func setScalar(v reflect.Value, s string) error {
-	return scalar.ParseValue(v, s)
+	return ScalarParseValue(v, s)
 }
